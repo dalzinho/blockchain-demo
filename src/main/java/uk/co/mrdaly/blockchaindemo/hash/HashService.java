@@ -1,5 +1,16 @@
 package uk.co.mrdaly.blockchaindemo.hash;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+
+@Service
+@Slf4j
 public class HashService {
 
     private String calculateHash(String previousHash, LocalDateTime timeStamp, int nonce, String data) {

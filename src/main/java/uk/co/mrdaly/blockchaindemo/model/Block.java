@@ -1,6 +1,7 @@
 package uk.co.mrdaly.blockchaindemo.model;
 
 import lombok.Getter;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
@@ -23,4 +24,10 @@ public class Block {
         this.nonce = nonce;
     }
 
+    @Override
+    public String toString() {
+        return "Block{" +
+                "data='" + data + '\'' +
+                '}';
+    }
 }

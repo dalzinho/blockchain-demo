@@ -1,45 +1,34 @@
 package uk.co.mrdaly.blockchaindemo.miner;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import uk.co.mrdaly.blockchaindemo.chain.ChainService;
-import uk.co.mrdaly.blockchaindemo.hash.HashService;
-import uk.co.mrdaly.blockchaindemo.model.Block;
+import uk.co.mrdaly.blockchaindemo.model.ExecutorStats;
 
-import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
 public class BlockMiner {
 
-    @Value("${prefix.size}:5")
-    private int prefixSize;
+    private final MinerExecutor minerExecutor;
 
-    private final HashService hashService;
-    private final ChainService chainService;
 
-    public BlockMiner(HashService hashService, ChainService chainService) {
-        this.hashService = hashService;
-        this.chainService = chainService;
+    public BlockMiner(MinerExecutor minerExecutor) {
+        this.minerExecutor = minerExecutor;
     }
 
     public void mineForData(String data) {
-        String previousHash = chainService.getLastHash();
-        LocalDateTime localDateTime = LocalDateTime.now();
-
-        String prefixString = new String(new char[prefixSize]).replace('\0', '0');
-
-        String hash = "";
-        int nonce = 0;
-        while(!hash.substring(0, prefixSize).equals(prefixString)) {
-            hash = hashService.calculateHash(previousHash, localDateTime, nonce, data);
-            log.info("Most recent hash of {} is {}", data, hash);
-            nonce++;
-        }
-        log.info("found hash {} for {}", hash, data);
-        Block block = new Block(previousHash, data, localDateTime, hash, nonce);
-        chainService.addBlock(block);
-
+        minerExecutor.submit(data);
     }
+
+    public boolean pollForDone() {
+        final ExecutorStats stats = minerExecutor.poll();
+        log.info("Executor service has {} jobs running and {} waiting.", stats.getActiveTasks(), stats.getWaiting());
+        return stats.tasksComplete();
+    }
+
 }

@@ -1,6 +1,5 @@
 package uk.co.mrdaly.blockchaindemo.validator;
 
-import org.springframework.boot.autoconfigure.web.WebProperties;
 import org.springframework.stereotype.Component;
 import uk.co.mrdaly.blockchaindemo.model.Block;
 

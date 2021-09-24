@@ -51,7 +51,7 @@ public class MinerExecutor {
             future.get();
         } catch (InterruptedException | ExecutionException e) {
             log.error("some concurrency error", e);
-            Thread.currentThread().interrupt();;
+            Thread.currentThread().interrupt();
         }
     }
 

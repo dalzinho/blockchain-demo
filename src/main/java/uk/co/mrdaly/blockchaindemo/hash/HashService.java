@@ -13,7 +13,10 @@ import java.time.ZoneOffset;
 @Slf4j
 public class HashService {
 
-    private String calculateHash(String previousHash, LocalDateTime timeStamp, int nonce, String data) {
+    public String calculateHash(String previousHash,
+                                LocalDateTime timeStamp,
+                                int nonce,
+                                String data) {
         String hashInput = previousHash
                 + timeStamp.toEpochSecond(ZoneOffset.UTC)
                 + nonce

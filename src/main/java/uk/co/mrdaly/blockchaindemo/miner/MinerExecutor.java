@@ -1,25 +1,34 @@
 package uk.co.mrdaly.blockchaindemo.miner;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.co.mrdaly.blockchaindemo.model.ExecutorStats;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
-import java.util.stream.Collectors;
 
 @Component
 @Slf4j
-public class MinerExecutor {
+public class MinerExecutor implements InitializingBean {
+
+    @Value("${miner.pool.size:10}")
+    private int minerPoolSize;
 
     private final BlockMinerCallableFactory blockMinerCallableFactory;
     private List<Future<Void>> taskQueue = new ArrayList<>();
 
-    private final ExecutorService executorService = Executors.newFixedThreadPool(5);
+    private ExecutorService executorService;
 
     public MinerExecutor(BlockMinerCallableFactory blockMinerCallableFactory) {
         this.blockMinerCallableFactory = blockMinerCallableFactory;
+    }
+
+    @Override
+    public void afterPropertiesSet() {
+        executorService = Executors.newFixedThreadPool(minerPoolSize);
     }
 
     public void submit(String data) {
@@ -29,7 +38,6 @@ public class MinerExecutor {
     }
 
     public ExecutorStats poll() {
-
         List<Future<Void>> updatedList = new ArrayList<>();
 
         for (Future<Void> future : taskQueue) {
@@ -54,5 +62,4 @@ public class MinerExecutor {
             Thread.currentThread().interrupt();
         }
     }
-
 }

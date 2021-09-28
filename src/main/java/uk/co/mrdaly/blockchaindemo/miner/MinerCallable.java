@@ -2,13 +2,11 @@ package uk.co.mrdaly.blockchaindemo.miner;
 
 import lombok.extern.slf4j.Slf4j;
 import uk.co.mrdaly.blockchaindemo.chain.ChainService;
-import uk.co.mrdaly.blockchaindemo.exception.ChainCollisionException;
 import uk.co.mrdaly.blockchaindemo.hash.HashService;
 import uk.co.mrdaly.blockchaindemo.model.Block;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.concurrent.Callable;
 
 @Slf4j
@@ -36,7 +34,7 @@ public class MinerCallable implements Callable<Void> {
 
         String hash = "";
         int nonce = 0;
-        while(hash.isEmpty() || !hash.substring(0, prefixSize).equals(prefixString)) {
+        while (hash.isEmpty() || !hash.substring(0, prefixSize).equals(prefixString)) {
             if (!previousHash.equals(chainService.getLastHash())) {
                 log.info("Looks like the last hash in the chain has changed! Resetting hash and nonce for {} after {}",
                         data, Duration.between(start, LocalDateTime.now()));
@@ -48,13 +46,13 @@ public class MinerCallable implements Callable<Void> {
         }
 
         log.info("found hash {} for {}", hash, data);
-        try {
-            Block block = new Block(previousHash, data, start, hash, nonce);
-            chainService.addBlock(block);
-        } catch (ChainCollisionException e) {
-            log.error("Collision!", e);
+        Block block = new Block(previousHash, data, start, hash, nonce);
+        boolean blockAddedToChain = chainService.addBlockAndConfirmAddition(block);
+
+        if (!blockAddedToChain) {
             call();
         }
+
         final Duration duration = Duration.between(start, LocalDateTime.now());
         log.info("{} entered into blockchain. Hashing took {} seconds", data, duration.getSeconds());
         return null;

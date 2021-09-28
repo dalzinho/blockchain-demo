@@ -1,7 +1,6 @@
 package uk.co.mrdaly.blockchaindemo.chain;
 
 import org.springframework.stereotype.Component;
-import uk.co.mrdaly.blockchaindemo.exception.ChainCollisionException;
 import uk.co.mrdaly.blockchaindemo.model.Block;
 
 import java.util.ArrayList;
@@ -19,12 +18,13 @@ public class ChainService {
         return lastHash;
     }
 
-    public synchronized void addBlock(Block block) {
+    public synchronized boolean addBlockAndConfirmAddition(Block block) {
         if (!block.getPreviousHash().equals(lastHash)) {
-            throw new ChainCollisionException("Block's previous hash does not match actual previous");
+            return false;
         }
         chain.add(block);
         lastHash = block.getHash();
+        return true;
     }
 
     public List<Block> getChain() {
